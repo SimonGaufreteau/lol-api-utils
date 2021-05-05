@@ -1,0 +1,10 @@
+{
+    "css.validate": false, // Disable css built-in lint
+    "stylelint.enable": true,
+    "liveServer.settings.port": 5501, // Enable sytlelint   
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+      },
+    "eslint.validate": ["javascript","typescript"]
+}
