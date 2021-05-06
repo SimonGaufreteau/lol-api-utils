@@ -35,7 +35,6 @@ async function getSummonerIDByName(name) {
 }
 
 async function getMatchesID(summonerId, start = 0, count = 20) {
-    console.log(`id : ${summonerId}`);
     const url = `${BASE_URL}lol/match/v5/matches/by-puuid/${summonerId}/ids?start=${start}&count=${count}`;
     await limiter.removeTokens(1);
     const result = fetch(url, { headers: BASE_HEADERS })
@@ -56,33 +55,24 @@ async function getMatchByID(id) {
         });
 }
 
-async function checkGamesInCommon(mainName, arrayName) {
-    let idsPlayer = [];
-    let ids = [];
+async function getGamesFromNameList(arrayName) {
+    let playerMatchesId = [];
+    let playerIds = [];
     for (const playerName of arrayName) {
-        ids.push(getSummonerIDByName(playerName));
+        playerIds.push(getSummonerIDByName(playerName));
     }
-    ids = await Promise.all(ids);
-    for (const id of ids) {
-        idsPlayer.push(getMatchesID(id));
+    playerIds = await Promise.all(playerIds);
+    for (const id of playerIds) {
+        playerMatchesId.push(getMatchesID(id));
     }
-    idsPlayer = await Promise.all(idsPlayer);
-    console.log(`ids: ${idsPlayer}`);
-    for (let i = 0; i < arrayName.length; i += 1) {
-        const playerName = arrayName[i];
-        const matchesId = idsPlayer[i];
-        console.log(`Player : ${playerName}`);
-        console.log(matchesId);
-        console.log(matchesId.length);
-    }
+    playerMatchesId = await Promise.all(playerMatchesId);
 
     // For each game of each player :
     // for each other player in this game, if player in list given, add the game to the result
     let allMatches = [];
-    for (let i = 0; i < idsPlayer.length; i += 1) {
-        const matchesId = idsPlayer[i];
+    for (let i = 0; i < playerMatchesId.length; i += 1) {
+        const matchesId = playerMatchesId[i];
         const tempArray = [];
-        // eslint-disable-next-line no-restricted-syntax
         for (let j = 0; j < matchesId.length; j += 1) {
             const id = matchesId[j];
             tempArray.push(getMatchByID(id));
@@ -134,24 +124,23 @@ function getQueueType(id) {
 function printMatches(matches) {
     let maxGamePerPlayer = 0;
     let minGamePerPlayer = 999;
-
+    let resMessage = '';
     let meanPlayer = 0;
     let i = 0;
     const tab = '    ';
     for (const playerMatches of matches) {
-        console.log(`Logging matches for player ${i} :`);
+        resMessage += `\nLogging matches for player ${i} :\n`;
         let j = 0;
         for (const game of playerMatches) {
             if (game !== undefined) {
-                console.log(`Match ${j} :`);
-                console.log(`Mode : ${game.info.gameMode} ${getQueueType(game.info.queueId)}`);
-                console.log('Participants :');
+                resMessage += `\nMatch ${j} :\n`;
+                resMessage += `Mode : ${game.info.gameMode} ${getQueueType(game.info.queueId)}\n`;
+                resMessage += 'Participants :\n';
                 for (const par of game.info.participants) {
-                    console.log(`${tab}Player ${par.summonerName} :`);
-                    console.log(`${tab}- champ : ${par.championName}`);
-                    console.log(`${tab}- position : ${par.individualPosition} or ${par.lane} `);
-
-                    console.log(`${tab}- KDA : ${par.kills}/${par.deaths}/${par.assists}`);
+                    resMessage += `${tab}${par.summonerName} :\n`;
+                    resMessage += `${tab}- champ : ${par.championName}\n`;
+                    resMessage += `${tab}- position : ${par.individualPosition} or ${par.lane} \n`;
+                    resMessage += `${tab}- KDA : ${par.kills}/${par.deaths}/${par.assists}\n\n`;
                 }
                 j += 1;
             }
@@ -161,6 +150,7 @@ function printMatches(matches) {
         minGamePerPlayer = Math.min(minGamePerPlayer, j);
         i += 1;
     }
+    console.log(resMessage);
     console.log(`Number of players : ${i + 1}`);
     console.log(`Number of games per player (max / mean / min) : 
     ${maxGamePerPlayer} / ${Math.round(meanPlayer / i)} / ${minGamePerPlayer}`);
