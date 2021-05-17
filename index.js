@@ -16,20 +16,13 @@ async function main() {
         matches = Utils.removeEmptyOrNull(matches);
         Utils.printMatches(matches);
     } else {
+        const names = ['3x1', 'Lwipon', 'Ailler', 'Erebz', 'Mε Mysεlf n I'];
         const API = new LoLAPI();
-        const id = await API.getSummonerIDByName('3x1');
-        console.log(`id : ${id}`);
-        const matches = await API.getMatchesID(id, 0, 5);
-        console.log(matches);
-        const results = [];
-        for (const match of matches) {
-            results.push(API.getMatchByID(match));
-        }
-        Promise.all(results).then((res) => {
-            for (const match of res) {
-                console.log(match);
-            }
-        });
+        const matches = await API.getGamesFromNameList(names, 50);
+        console.log(`names : ${names}`);
+        // Utils.printMatches(matches);
+        // console.log(matches);
+        FilesUtils.saveMatchesTofile('./saves/MMM50.json', matches);
     }
 }
 

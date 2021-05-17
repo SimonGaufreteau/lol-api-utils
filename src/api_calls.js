@@ -3,18 +3,20 @@ import fetch from 'node-fetch';
 import * as APIUtils from './api_utils.js';
 
 export default class LoLAPI {
-    constructor() {
-        this.limiter = new RateLimiter({ tokensPerInterval: 3, interval: 'second' });
+    constructor(log = true) {
+        this.limiter = new RateLimiter({ tokensPerInterval: 4, interval: 5000 });
         this.BASE_URL = 'https://europe.api.riotgames.com/';
         this.BASE_HEADERS = {
             'X-Riot-Token': process.env.API_KEY,
         };
         this.FAILED = [];
+        this.logging = log;
     }
 
     async getSummonerIDByName(name) {
-        const url = `${this.BASE_URL}riot/account/v1/accounts/by-riot-id/${name}/EUW`;
+        const url = `${this.BASE_URL}riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/EUW`;
         await this.limiter.removeTokens(1);
+        APIUtils.logRequest(url, this.logging);
         return fetch(url, { headers: this.BASE_HEADERS })
             .then((res) => APIUtils.checkResponse(res))
             .then((response) => response.json())
@@ -25,6 +27,7 @@ export default class LoLAPI {
     async getMatchesID(summonerId, start = 0, count = 20) {
         const url = `${this.BASE_URL}lol/match/v5/matches/by-puuid/${summonerId}/ids?start=${start}&count=${count}`;
         await this.limiter.removeTokens(1);
+        APIUtils.logRequest(url, this.logging);
         const result = fetch(url, { headers: this.BASE_HEADERS })
             .then((res) => APIUtils.checkResponse(res))
             .then((response) => response.json());
@@ -35,6 +38,7 @@ export default class LoLAPI {
     async getMatchByID(id) {
         const url = `${this.BASE_URL}lol/match/v5/matches/${id}`;
         await this.limiter.removeTokens(1);
+        APIUtils.logRequest(url, this.logging);
         return fetch(url, { headers: this.BASE_HEADERS }).then((res) => APIUtils.checkResponse(res))
             .then((response) => response.json())
             .catch((error) => {
@@ -43,7 +47,7 @@ export default class LoLAPI {
             });
     }
 
-    async getGamesFromNameList(arrayName) {
+    async getGamesFromNameList(arrayName, matchCount = 20) {
         let playerMatchesId = [];
         let playerIds = [];
         for (const playerName of arrayName) {
@@ -51,7 +55,7 @@ export default class LoLAPI {
         }
         playerIds = await Promise.all(playerIds);
         for (const id of playerIds) {
-            playerMatchesId.push(this.getMatchesID(id));
+            playerMatchesId.push(this.getMatchesID(id, 0, matchCount));
         }
         playerMatchesId = await Promise.all(playerMatchesId);
 

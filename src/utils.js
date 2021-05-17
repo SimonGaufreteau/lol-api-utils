@@ -52,7 +52,7 @@ export function printMatches(matches) {
         i += 1;
     }
     console.log(resMessage);
-    console.log(`Number of players : ${i + 1}`);
+    console.log(`Number of players : ${i}`);
     console.log(`Number of games per player (max / mean / min) : 
     ${maxGamePerPlayer} / ${Math.round(meanPlayer / i)} / ${minGamePerPlayer}`);
 }
