@@ -13,6 +13,20 @@ export function getQueueType(id) {
     }
 }
 
+export function getMatchString(game) {
+    let resMessage = '';
+    const tab = '    ';
+    resMessage += `Mode : ${game.info.gameMode} ${getQueueType(game.info.queueId)}\n`;
+    resMessage += 'Participants :\n';
+    for (const par of game.info.participants) {
+        resMessage += `${tab}${par.summonerName} :\n`;
+        resMessage += `${tab}- champ : ${par.championName}\n`;
+        resMessage += `${tab}- position : ${par.individualPosition} or ${par.lane} \n`;
+        resMessage += `${tab}- KDA : ${par.kills}/${par.deaths}/${par.assists}\n\n`;
+    }
+    return resMessage;
+}
+
 export function printMatches(matches) {
     let maxGamePerPlayer = 0;
     let minGamePerPlayer = 999;
@@ -29,14 +43,7 @@ export function printMatches(matches) {
         for (const game of playerMatches) {
             if (game !== undefined) {
                 resMessage += `\nMatch ${j} :\n`;
-                resMessage += `Mode : ${game.info.gameMode} ${getQueueType(game.info.queueId)}\n`;
-                resMessage += 'Participants :\n';
-                for (const par of game.info.participants) {
-                    resMessage += `${tab}${par.summonerName} :\n`;
-                    resMessage += `${tab}- champ : ${par.championName}\n`;
-                    resMessage += `${tab}- position : ${par.individualPosition} or ${par.lane} \n`;
-                    resMessage += `${tab}- KDA : ${par.kills}/${par.deaths}/${par.assists}\n\n`;
-                }
+                resMessage += getMatchString(game);
                 j += 1;
             }
         }

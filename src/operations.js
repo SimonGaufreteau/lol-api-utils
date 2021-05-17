@@ -142,5 +142,29 @@ export default class Operations {
         }
     }
 
-    getGamesInCommon() { }
+    /**
+     * Returns the matches with at least 2 player with the same name as in "names"
+     * @returns {Array<any>}
+     */
+    getGamesInCommon() {
+        const matchesID = new Set();
+        const matches = [];
+        for (const playerMatches of this.matches) {
+            for (const game of playerMatches) {
+                if (!matchesID.has(game.metadata.matchId)) {
+                    // Check if at least 2 players are present in the game
+                    let playersCount = 0;
+                    for (const participant of game.info.participants) {
+                        // Save the player if present and break
+                        if (this.names.includes(participant.summonerName)) { playersCount += 1; }
+                    }
+                    if (playersCount > 1) {
+                        matchesID.add(game.matchId);
+                        matches.push(game);
+                    }
+                }
+            }
+        }
+        return matches;
+    }
 }

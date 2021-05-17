@@ -20,6 +20,10 @@ async function main() {
         OP.removeUnrelevantGames();
         console.log(OP.getAllRolesMapped());
         console.log(OP.getMainRolesMapped());
+        const gic = OP.getGamesInCommon();
+        for (const game of gic) {
+            console.log(Utils.getMatchString(game));
+        }
     } else {
         const API = new LoLAPI();
         const matches = await API.getGamesFromNameList(names, 50);
