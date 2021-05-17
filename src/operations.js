@@ -36,6 +36,21 @@ export default class Operations {
     }
 
     /**
+     * Returns the game object if the player is present in the game, null if not
+     * @param {any} game
+     * @param {string} playerName
+     */
+    static isPlayerPresent(game, playerName) {
+        for (const participant of game.info.participants) {
+            // Save the player if present and break
+            if (participant.summonerName === playerName) {
+                return participant;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the roles played by the player in the matches with the number of
      * games for each role
      * @param {string} playerName
@@ -47,17 +62,8 @@ export default class Operations {
         for (const game of this.matches) {
             if (!matchesID.has(game.metadata.matchId)) {
                 // Check if the player is present in the game
-                let isPresent = false;
-                let player = null;
-                for (const participant of game.info.participants) {
-                    // Save the player if present and break
-                    if (participant.summonerName === playerName) {
-                        isPresent = true;
-                        player = participant;
-                        break;
-                    }
-                }
-                if (isPresent) {
+                const player = Operations.isPlayerPresent(game, playerName);
+                if (player !== null) {
                     // player is the participant object here
                     matchesID.add(game.matchId);
                     const role = player.individualPosition;
@@ -103,7 +109,7 @@ export default class Operations {
      * @returns {Array<string>}
      * @see getMainRole,getMainRolesMapped
      */
-    getMainRoles() {
+    getAllMainRoles() {
         const mainRoles = [];
         for (const n of this.names) {
             mainRoles.push(this.getMainRole(n));
@@ -127,7 +133,61 @@ export default class Operations {
         return resMap;
     }
 
-    getChampionsPlayed() { }
+    /**
+     * Returns the champions played by the given player
+     * @param {string} playerName
+     */
+    getChampionsPlayed(playerName) {
+        const matchesID = new Set();
+        const champions = new Map();
+        for (const game of this.matches) {
+            if (!matchesID.has(game.metadata.matchId)) {
+                // Check if the player is present in the game
+                const player = Operations.isPlayerPresent(game, playerName);
+                if (player !== null) {
+                    // player is the participant object here
+                    matchesID.add(game.matchId);
+                    const champ = player.championName;
+                    let nGames = 1;
+                    if (champions.has(champ)) {
+                        nGames += champions.get(champ);
+                    }
+                    champions.set(champ, nGames);
+                }
+            }
+        }
+        return champions;
+    }
+
+    /**
+     * Returns all champions played by all every player
+     */
+
+    getAllChampionsPlayed() {
+        const champions = [];
+        for (const n of this.names) {
+            champions.push(this.getChampionsPlayed(n));
+        }
+        return champions;
+    }
+
+    /**
+     * Returns the top N champions played by every player
+     * @param {number} N Number of champions to keep
+     * @returns An array of array of type : [name of champion, number of occurences]
+     * @see getAllChampionsPlayed
+     */
+    getTopChampionsPlayed(N = 3) {
+        const championsPlayer = this.getRolesMapped(this.getAllChampionsPlayed());
+        const res = [];
+        for (const [name, champions] of championsPlayer) {
+            const sorted = [...champions.entries()].sort((a, b) => b[1] - a[1]);
+            let tempN = N;
+            tempN = Math.min(sorted.length - 1, tempN);
+            res.push(sorted.splice(0, tempN));
+        }
+        return res;
+    }
 
     /**
      * Removes any game that is either null, undefined, or not a 5v5 standard (flex, normal or soloq) game

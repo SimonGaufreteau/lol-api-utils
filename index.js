@@ -18,20 +18,34 @@ async function main() {
 
         const OP = new Operations(names, matches);
         OP.removeUnrelevantGames();
+        console.log('\n-------------------------------------\n');
+        console.log('------------- ALL GAMES -------------\n');
+        console.log('-------------------------------------\n');
         console.log('All roles mapped :');
         console.log(OP.getRolesMapped(OP.getAllRoles()));
         console.log('\nMain roles mapped :');
-        console.log(OP.getRolesMapped(OP.getMainRoles()));
+        console.log(OP.getRolesMapped(OP.getAllMainRoles()));
+        console.log('\nChampions played :');
+        console.log(OP.getRolesMapped(OP.getAllChampionsPlayed()));
+        console.log('\nTop champions played');
+        console.log(OP.getRolesMapped(OP.getTopChampionsPlayed()));
         // console.log('\nGames in common :');
         // const gic = OP.getGamesInCommon();
         // for (const game of gic) {
         //     console.log(Utils.getMatchString(game));
         // }
         OP.switchMatchesTogether();
+        console.log('\n-------------------------------------\n');
+        console.log('----------- GAMES TOGETHER ----------\n');
+        console.log('-------------------------------------\n');
         console.log('\nAll roles together :');
         console.log(OP.getRolesMapped(OP.getAllRoles()));
         console.log('\nMain roles together :');
-        console.log(OP.getRolesMapped(OP.getMainRoles()));
+        console.log(OP.getRolesMapped(OP.getAllMainRoles()));
+        console.log('\nChampions played :');
+        console.log(OP.getRolesMapped(OP.getAllChampionsPlayed()));
+        console.log('\nTop champions played');
+        console.log(OP.getRolesMapped(OP.getTopChampionsPlayed()));
     } else {
         const API = new LoLAPI();
         const matches = await API.getGamesFromNameList(names, 50);
