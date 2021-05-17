@@ -7,7 +7,7 @@ import * as Utils from './src/utils.js';
 config();
 
 async function main() {
-    const readf = false;
+    const readf = true;
     const names = ['3x1', 'Lwipon', 'Ailler', 'Erebz', 'Mε Mysεlf n I'];
     if (readf) {
         // Example with a file read
