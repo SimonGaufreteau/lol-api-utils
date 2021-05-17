@@ -19,6 +19,7 @@ async function main() {
         const OP = new Operations(names, matches);
         OP.removeUnrelevantGames();
         console.log(OP.getAllRolesMapped());
+        console.log(OP.getMainRolesMapped());
     } else {
         const API = new LoLAPI();
         const matches = await API.getGamesFromNameList(names, 50);

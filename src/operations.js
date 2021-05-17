@@ -2,7 +2,6 @@ import * as Utils from './utils.js';
 
 export default class Operations {
     /**
-     *
      * @param {Array<string>} names
      * @param {JSON} matches
      */
@@ -63,6 +62,11 @@ export default class Operations {
         return roles;
     }
 
+    /**
+     * Same as getAllRoles but in mapped form with the names
+     * @returns {Map<string,Map<string,number>>}
+     * @see getAllRoles
+     */
     getAllRolesMapped() {
         const roles = this.getAllRoles();
         const resMap = new Map();
@@ -74,20 +78,60 @@ export default class Operations {
         return resMap;
     }
 
-    getMainRole(player) { }
+    /**
+     * Returns the main role of the given player in this object's matches. Returns null if the player is not found
+     * @param {string} player
+     * @returns {string}
+     */
+    getMainRole(player) {
+        const rolesMapped = this.getAllRolesMapped();
+        if (rolesMapped.has(player)) {
+            return [...rolesMapped.get(player).entries()].reduce((a, e) => (e[1] > a[1] ? e : a))[0];
+        }
+        return null;
+    }
 
-    getMainRoles() { }
+    /**
+     * Returns the main role for each player
+     * @returns {Array<string>}
+     * @see getMainRole,getMainRolesMapped
+     */
+    getMainRoles() {
+        const mainRoles = [];
+        for (const n of this.names) {
+            mainRoles.push(this.getMainRole(n));
+        }
+        return mainRoles;
+    }
+
+    /**
+     * Same as getMainRoles but in mapped form with the names
+     * @returns {Map<string,Map<string,number>>}
+     * @see getAllRoles
+     */
+    getMainRolesMapped() {
+        const mainRoles = this.getMainRoles();
+        const resMap = new Map();
+        let i = 0;
+        for (const name of this.names) {
+            resMap.set(name, mainRoles[i]);
+            i += 1;
+        }
+        return resMap;
+    }
 
     getRolesPlayedTogether() { }
 
     getChampionsPlayedTogether() { }
 
+    /**
+     * Removes any game that is either null, undefined, or not a 5v5 standard (flex, normal or soloq) game
+     */
     removeUnrelevantGames() {
         for (let i = 0; i < this.matches.length; i += 1) {
             const playerMatches = this.matches[i];
             for (let j = 0; j < playerMatches.length; j += 1) {
                 const game = playerMatches[j];
-                const indexToRemove = [];
                 if (game === null || game === undefined || Utils.getQueueType(game.info.queueId) === '') {
                     this.matches[i].splice(j, 1);
                     j -= 1;
@@ -97,4 +141,6 @@ export default class Operations {
             }
         }
     }
+
+    getGamesInCommon() { }
 }
