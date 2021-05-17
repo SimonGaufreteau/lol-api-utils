@@ -12,6 +12,7 @@ export default class Operations {
             tempArray = tempArray.concat(playerMatches);
         }
         this.matches = tempArray;
+        this.removeUnrelevantGames();
         this.baseN = 1;
         this.saveMatches = this.matches;
     }
@@ -92,13 +93,14 @@ export default class Operations {
     }
 
     /**
-     * Returns the main role of the given player in this object's matches. Returns null if the player is not found
+     * Returns the main role of the given player in this object's matches.
+     * Returns null if the player is not found or no role has been played
      * @param {string} player
      * @returns {string}
      */
     getMainRole(player) {
         const rolesMapped = this.getRolesMapped(this.getAllRoles());
-        if (rolesMapped.has(player)) {
+        if (rolesMapped.has(player) && rolesMapped.size === 0) {
             return [...rolesMapped.get(player).entries()].reduce((a, e) => (e[1] > a[1] ? e : a))[0];
         }
         return null;
@@ -225,5 +227,39 @@ export default class Operations {
             }
         }
         return matches;
+    }
+
+    /**
+     * Prints every stat operation available in this class to the console.
+     */
+    printEveryStat() {
+        console.log('\n-------------------------------------\n');
+        console.log('------------- ALL GAMES -------------\n');
+        console.log('-------------------------------------\n');
+        console.log('All roles mapped :');
+        console.log(this.getRolesMapped(this.getAllRoles()));
+        console.log('\nMain roles mapped :');
+        console.log(this.getRolesMapped(this.getAllMainRoles()));
+        console.log('\nChampions played :');
+        console.log(this.getRolesMapped(this.getAllChampionsPlayed()));
+        console.log('\nTop champions played');
+        console.log(this.getRolesMapped(this.getTopChampionsPlayed()));
+        // console.log('\nGames in common :');
+        // const gic = this.getGamesInCommon();
+        // for (const game of gic) {
+        //     console.log(Utils.getMatchString(game));
+        // }
+        this.switchMatchesTogether();
+        console.log('\n-------------------------------------\n');
+        console.log('----------- GAMES TOGETHER ----------\n');
+        console.log('-------------------------------------\n');
+        console.log('\nAll roles together :');
+        console.log(this.getRolesMapped(this.getAllRoles()));
+        console.log('\nMain roles together :');
+        console.log(this.getRolesMapped(this.getAllMainRoles()));
+        console.log('\nChampions played :');
+        console.log(this.getRolesMapped(this.getAllChampionsPlayed()));
+        console.log('\nTop champions played :');
+        console.log(this.getRolesMapped(this.getTopChampionsPlayed()));
     }
 }
