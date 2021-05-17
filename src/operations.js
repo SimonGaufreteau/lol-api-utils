@@ -257,9 +257,9 @@ export default class Operations {
         console.log(this.getRolesMapped(this.getAllRoles()));
         console.log('\nMain roles together :');
         console.log(this.getRolesMapped(this.getAllMainRoles()));
-        console.log('\nChampions played :');
+        console.log('\nChampions played together :');
         console.log(this.getRolesMapped(this.getAllChampionsPlayed()));
-        console.log('\nTop champions played :');
+        console.log('\nTop champions played together:');
         console.log(this.getRolesMapped(this.getTopChampionsPlayed()));
     }
 }
