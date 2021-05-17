@@ -7,9 +7,11 @@ export function removeEmptyOrNull(obj) {
 export function getQueueType(id) {
     switch (id) {
     case 400:
-        return 'Normal';
+        return 'Normal Draft';
     case 420:
         return 'Soloq';
+    case 430:
+        return 'Blind';
     case 440:
         return 'Flex';
     default
@@ -24,6 +26,9 @@ export function printMatches(matches) {
     let meanPlayer = 0;
     let i = 0;
     const tab = '    ';
+    resMessage += '----------------------------';
+    resMessage += 'Matches';
+    resMessage += '----------------------------';
     for (const playerMatches of matches) {
         resMessage += `\nLogging matches for player ${i} :\n`;
         let j = 0;
