@@ -7,7 +7,32 @@ export default class Operations {
      */
     constructor(names, matches) {
         this.names = names;
-        this.matches = matches;
+        let tempArray = [];
+        for (const playerMatches of matches) {
+            tempArray = tempArray.concat(playerMatches);
+        }
+        this.matches = tempArray;
+        this.baseN = 1;
+        this.saveMatches = this.matches;
+    }
+
+    /**
+     * Switch the matches to those played together. The current matches are saved and can be
+     * accessed with {@link switchStandardMatches}
+     * @param {S} N number of players from the list that must be in the game
+     * @see switchStandardMatches
+     */
+    switchMatchesTogether(N = this.baseN) {
+        this.saveMatches = this.matches;
+        this.matches = this.getGamesInCommon(N);
+    }
+
+    /**
+     * Switch the matches to the base ones.
+     * @see switchMatchesTogether
+     */
+    switchStandardMatches() {
+        this.matches = this.saveMatches;
     }
 
     /**
@@ -19,30 +44,28 @@ export default class Operations {
     getRoles(playerName) {
         const matchesID = new Set();
         const roles = new Map();
-        for (const playerMatches of this.matches) {
-            for (const game of playerMatches) {
-                if (!matchesID.has(game.metadata.matchId)) {
-                    // Check if the player is present in the game
-                    let isPresent = false;
-                    let player = null;
-                    for (const participant of game.info.participants) {
-                        // Save the player if present and break
-                        if (participant.summonerName === playerName) {
-                            isPresent = true;
-                            player = participant;
-                            break;
-                        }
+        for (const game of this.matches) {
+            if (!matchesID.has(game.metadata.matchId)) {
+                // Check if the player is present in the game
+                let isPresent = false;
+                let player = null;
+                for (const participant of game.info.participants) {
+                    // Save the player if present and break
+                    if (participant.summonerName === playerName) {
+                        isPresent = true;
+                        player = participant;
+                        break;
                     }
-                    if (isPresent) {
-                        // player is the participant object here
-                        matchesID.add(game.matchId);
-                        const role = player.individualPosition;
-                        let nGames = 1;
-                        if (roles.has(role)) {
-                            nGames += roles.get(role);
-                        }
-                        roles.set(role, nGames);
+                }
+                if (isPresent) {
+                    // player is the participant object here
+                    matchesID.add(game.matchId);
+                    const role = player.individualPosition;
+                    let nGames = 1;
+                    if (roles.has(role)) {
+                        nGames += roles.get(role);
                     }
+                    roles.set(role, nGames);
                 }
             }
         }
@@ -63,28 +86,12 @@ export default class Operations {
     }
 
     /**
-     * Same as getAllRoles but in mapped form with the names
-     * @returns {Map<string,Map<string,number>>}
-     * @see getAllRoles
-     */
-    getAllRolesMapped() {
-        const roles = this.getAllRoles();
-        const resMap = new Map();
-        let i = 0;
-        for (const name of this.names) {
-            resMap.set(name, roles[i]);
-            i += 1;
-        }
-        return resMap;
-    }
-
-    /**
      * Returns the main role of the given player in this object's matches. Returns null if the player is not found
      * @param {string} player
      * @returns {string}
      */
     getMainRole(player) {
-        const rolesMapped = this.getAllRolesMapped();
+        const rolesMapped = this.getRolesMapped(this.getAllRoles());
         if (rolesMapped.has(player)) {
             return [...rolesMapped.get(player).entries()].reduce((a, e) => (e[1] > a[1] ? e : a))[0];
         }
@@ -105,63 +112,55 @@ export default class Operations {
     }
 
     /**
-     * Same as getMainRoles but in mapped form with the names
-     * @returns {Map<string,Map<string,number>>}
-     * @see getAllRoles
+     * Maps the roles to the names
+     * @param {Array<T>} roles Roles to map
+     * @returns {Map<string,T>} Mapped roles
+     * @see getAllRoles,getMainRoles
      */
-    getMainRolesMapped() {
-        const mainRoles = this.getMainRoles();
+    getRolesMapped(roles) {
         const resMap = new Map();
         let i = 0;
         for (const name of this.names) {
-            resMap.set(name, mainRoles[i]);
+            resMap.set(name, roles[i]);
             i += 1;
         }
         return resMap;
     }
 
-    getRolesPlayedTogether() { }
-
-    getChampionsPlayedTogether() { }
+    getChampionsPlayed() { }
 
     /**
      * Removes any game that is either null, undefined, or not a 5v5 standard (flex, normal or soloq) game
      */
     removeUnrelevantGames() {
         for (let i = 0; i < this.matches.length; i += 1) {
-            const playerMatches = this.matches[i];
-            for (let j = 0; j < playerMatches.length; j += 1) {
-                const game = playerMatches[j];
-                if (game === null || game === undefined || Utils.getQueueType(game.info.queueId) === '') {
-                    this.matches[i].splice(j, 1);
-                    j -= 1;
-                    // console.log(`+${i} / ${j}`);
-                    // console.log(game);
-                }
+            const game = this.matches[i];
+            if (game === null || game === undefined || Utils.getQueueType(game.info.queueId) === '') {
+                this.matches.splice(i, 1);
+                i -= 1;
             }
         }
     }
 
     /**
-     * Returns the matches with at least 2 player with the same name as in "names"
+     * Returns the matches with at least N players from the "names" list
+     * @param {number} N The number of players
      * @returns {Array<any>}
      */
-    getGamesInCommon() {
+    getGamesInCommon(N = this.baseN) {
         const matchesID = new Set();
         const matches = [];
-        for (const playerMatches of this.matches) {
-            for (const game of playerMatches) {
-                if (!matchesID.has(game.metadata.matchId)) {
-                    // Check if at least 2 players are present in the game
-                    let playersCount = 0;
-                    for (const participant of game.info.participants) {
-                        // Save the player if present and break
-                        if (this.names.includes(participant.summonerName)) { playersCount += 1; }
-                    }
-                    if (playersCount > 1) {
-                        matchesID.add(game.matchId);
-                        matches.push(game);
-                    }
+        for (const game of this.matches) {
+            if (!matchesID.has(game.metadata.matchId)) {
+                // Check if at least 2 players are present in the game
+                let playersCount = 0;
+                for (const participant of game.info.participants) {
+                    // Save the player if present and break
+                    if (this.names.includes(participant.summonerName)) { playersCount += 1; }
+                }
+                if (playersCount > N) {
+                    matchesID.add(game.matchId);
+                    matches.push(game);
                 }
             }
         }

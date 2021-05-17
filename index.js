@@ -18,12 +18,20 @@ async function main() {
 
         const OP = new Operations(names, matches);
         OP.removeUnrelevantGames();
-        console.log(OP.getAllRolesMapped());
-        console.log(OP.getMainRolesMapped());
-        const gic = OP.getGamesInCommon();
-        for (const game of gic) {
-            console.log(Utils.getMatchString(game));
-        }
+        console.log('All roles mapped :');
+        console.log(OP.getRolesMapped(OP.getAllRoles()));
+        console.log('\nMain roles mapped :');
+        console.log(OP.getRolesMapped(OP.getMainRoles()));
+        // console.log('\nGames in common :');
+        // const gic = OP.getGamesInCommon();
+        // for (const game of gic) {
+        //     console.log(Utils.getMatchString(game));
+        // }
+        OP.switchMatchesTogether();
+        console.log('\nAll roles together :');
+        console.log(OP.getRolesMapped(OP.getAllRoles()));
+        console.log('\nMain roles together :');
+        console.log(OP.getRolesMapped(OP.getMainRoles()));
     } else {
         const API = new LoLAPI();
         const matches = await API.getGamesFromNameList(names, 50);
