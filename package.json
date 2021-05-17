@@ -1,7 +1,7 @@
 {
   "name": "lol_api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Some simple stats on League matches",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "serve": "nodemon index.js",
     "dev": "node index.js"
   },
-  "author": "",
+  "author": "Simon Gaufreteau",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.5.1",
