@@ -1,21 +1,15 @@
-export function removeEmptyOrNull(obj) {
-    Object.keys(obj).forEach((k) => (obj[k] && typeof obj[k] === 'object') && removeEmptyOrNull(obj[k])
-      || (!obj[k] && obj[k] !== undefined) && delete obj[k]);
-    return obj;
-}
-
 export function getQueueType(id) {
     switch (id) {
-    case 400:
-        return 'Normal Draft';
-    case 420:
-        return 'Soloq';
-    case 430:
-        return 'Blind';
-    case 440:
-        return 'Flex';
-    default
-        : return '';
+        case 400:
+            return 'Normal Draft';
+        case 420:
+            return 'Soloq';
+        case 430:
+            return 'Blind';
+        case 440:
+            return 'Flex';
+        default
+            : return '';
     }
 }
 
