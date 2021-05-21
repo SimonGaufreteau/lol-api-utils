@@ -100,9 +100,9 @@ export default class Operations {
      */
     getMainRole(player) {
         const rolesMapped = this.getRolesMapped(this.getAllRoles());
-        if (rolesMapped.has(player) && rolesMapped.size !== 0) {
+        if (rolesMapped.has(player) && rolesMapped.size !== 0 && rolesMapped.get(player).size > 0) {
             return [...rolesMapped.get(player).entries()].reduce((a, e) => (e[1] > a[1] ? e : a))[0];
-        }
+        } if (rolesMapped.get(player).length === 1) return rolesMapped.get(player);
         return null;
     }
 
